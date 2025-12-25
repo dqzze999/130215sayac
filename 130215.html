@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Özel Günlerimiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            font-size: 1.8rem;
+        }
+
+        /* Başlık Renkleri */
+        .baslik-gecen { color: #00ffcc; text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
+        .baslik-kalan { color: #ff3366; text-shadow: 0 0 10px rgba(255, 51, 102, 0.5); margin-top: 50px; }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            max-width: 1200px;
+            margin-bottom: 20px;
+        }
+
+        .kutu {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .kutu:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Çerçeve renkleri */
+        .border-gecen:hover { border-color: #00ffcc; }
+        .border-kalan:hover { border-color: #ff3366; }
+
+        .sayi {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .etiket {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; width: 100%; }
+            .kutu { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="baslik-gecen">13.02.2015'TEN BERİ</h1>
+    
+    <div class="container">
+        <div class="kutu border-gecen">
+            <span class="sayi" id="toplamGun">0</span>
+            <span class="etiket">GÜNDÜR</span>
+        </div>
+        <div class="kutu border-gecen">
+            <span class="sayi" id="toplamSaat">0</span>
+            <span class="etiket">SAATTİR</span>
+        </div>
+        <div class="kutu border-gecen">
+            <span class="sayi" id="toplamDakika">0</span>
+            <span class="etiket">DAKİKADIR</span>
+        </div>
+        <div class="kutu border-gecen">
+            <span class="sayi" id="toplamSaniye">0</span>
+            <span class="etiket">SANİYEDİR</span>
+        </div>
+    </div>
+
+    <h1 class="baslik-kalan">NİŞANA KALAN SÜRE (13.02.2026)</h1>
+
+    <div class="container">
+        <div class="kutu border-kalan">
+            <span class="sayi" id="kalanGun">0</span>
+            <span class="etiket">GÜN</span>
+        </div>
+        <div class="kutu border-kalan">
+            <span class="sayi" id="kalanSaat">0</span>
+            <span class="etiket">SAAT</span>
+        </div>
+        <div class="kutu border-kalan">
+            <span class="sayi" id="kalanDakika">0</span>
+            <span class="etiket">DAKİKA</span>
+        </div>
+        <div class="kutu border-kalan">
+            <span class="sayi" id="kalanSaniye">0</span>
+            <span class="etiket">SANİYE</span>
+        </div>
+    </div>
+
+    <script>
+        // --- AYARLAR ---
+        // Geçmiş Tarih (Yıl, Ay-1, Gün) -> 13 Şubat 2015
+        const tarihGecmis = new Date(2015, 1, 13, 0, 0, 0).getTime();
+        
+        // Gelecek Tarih (Yıl, Ay-1, Gün) -> 13 Şubat 2026 (Nişan)
+        const tarihNisan = new Date(2026, 1, 13, 0, 0, 0).getTime();
+
+        function sayaciGuncelle() {
+            const simdi = new Date().getTime();
+
+            // 1. HESAPLAMA: GEÇMİŞTEN BUGÜNE (Toplamlar)
+            const farkGecmis = simdi - tarihGecmis;
+            
+            document.getElementById("toplamGun").innerText = Math.floor(farkGecmis / (1000 * 60 * 60 * 24)).toLocaleString('tr-TR');
+            document.getElementById("toplamSaat").innerText = Math.floor(farkGecmis / (1000 * 60 * 60)).toLocaleString('tr-TR');
+            document.getElementById("toplamDakika").innerText = Math.floor(farkGecmis / (1000 * 60)).toLocaleString('tr-TR');
+            document.getElementById("toplamSaniye").innerText = Math.floor(farkGecmis / 1000).toLocaleString('tr-TR');
+
+            // 2. HESAPLAMA: NİŞANA GERİ SAYIM (Klasik Sayaç)
+            const farkNisan = tarihNisan - simdi;
+
+            if (farkNisan > 0) {
+                // Kalan süreyi Gün / Saat / Dakika / Saniye olarak bölüyoruz
+                const gun = Math.floor(farkNisan / (1000 * 60 * 60 * 24));
+                const saat = Math.floor((farkNisan % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const dakika = Math.floor((farkNisan % (1000 * 60 * 60)) / (1000 * 60));
+                const saniye = Math.floor((farkNisan % (1000 * 60)) / 1000);
+
+                document.getElementById("kalanGun").innerText = gun;
+                document.getElementById("kalanSaat").innerText = saat;
+                document.getElementById("kalanDakika").innerText = dakika;
+                document.getElementById("kalanSaniye").innerText = saniye;
+            } else {
+                // Tarih geçtiyse
+                document.querySelector(".baslik-kalan").innerText = "NİŞAN GÜNÜ GELDİ! 🎉";
+            }
+        }
+
+        setInterval(sayaciGuncelle, 1000);
+        sayaciGuncelle();
+    </script>
+
+</body>
+</html>
