@@ -47,7 +47,7 @@
             border: 1px solid #333;
             border-radius: 15px;
             padding: 15px;
-            min-width: 180px;
+            min-width: 140px;
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             transition: transform 0.3s ease;
@@ -65,14 +65,14 @@
         .sayi {
             display: block;
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #fff;
             margin-bottom: 5px;
         }
 
         .etiket {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -111,6 +111,14 @@
 
     <div class="container">
         <div class="kutu border-kalan">
+            <span class="sayi" id="kalanYil">0</span>
+            <span class="etiket">YIL</span>
+        </div>
+        <div class="kutu border-kalan">
+            <span class="sayi" id="kalanAy">0</span>
+            <span class="etiket">AY</span>
+        </div>
+        <div class="kutu border-kalan">
             <span class="sayi" id="kalanGun">0</span>
             <span class="etiket">GÜN</span>
         </div>
@@ -132,6 +140,14 @@
 
     <div class="container">
         <div class="kutu border-nikah">
+            <span class="sayi" id="nikahYil">0</span>
+            <span class="etiket">YIL</span>
+        </div>
+        <div class="kutu border-nikah">
+            <span class="sayi" id="nikahAy">0</span>
+            <span class="etiket">AY</span>
+        </div>
+        <div class="kutu border-nikah">
             <span class="sayi" id="nikahGun">0</span>
             <span class="etiket">GÜN</span>
         </div>
@@ -150,59 +166,74 @@
     </div>
 
     <script>
-        // --- AYARLAR ---
-        const tarihGecmis = new Date(2015, 1, 13, 0, 0, 0).getTime();
-        const tarihNisan = new Date(2026, 1, 13, 0, 0, 0).getTime();
-        const tarihNikah = new Date(2026, 7, 23, 13, 15, 0).getTime();
+        // Hedef Tarihler
+        const tarihGecmis = new Date(2015, 1, 13, 0, 0, 0);
+        const tarihNisan = new Date(2026, 1, 13, 0, 0, 0);
+        const tarihNikah = new Date(2026, 7, 23, 13, 15, 0);
+
+        // İki tarih arasındaki detaylı Yıl, Ay, Gün, Saat, Dakika, Saniye farkını bulan fonksiyon
+        function tarihFarkiniHesapla(baslangic, bitis) {
+            let nYil = bitis.getFullYear() - baslangic.getFullYear();
+            let nAy = bitis.getMonth() - baslangic.getMonth();
+            let nGun = bitis.getDate() - baslangic.getDate();
+            let nSaat = bitis.getHours() - baslangic.getHours();
+            let nDakika = bitis.getMinutes() - baslangic.getMinutes();
+            let nSaniye = bitis.getSeconds() - baslangic.getSeconds();
+
+            if (nSaniye < 0) { nSaniye += 60; nDakika--; }
+            if (nDakika < 0) { nDakika += 60; nSaat--; }
+            if (nSaat < 0) { nSaat += 24; nGun--; }
+            if (nGun < 0) {
+                // Geçen ayın toplam gün sayısını bulup ekliyoruz
+                const gecenAy = new Date(bitis.getFullYear(), bitis.getMonth(), 0);
+                nGun += gecenAy.getDate();
+                nAy--;
+            }
+            if (nAy < 0) { nAy += 12; nYil--; }
+
+            return { yil: nYil, ay: nAy, gun: nGun, saat: nSaat, dakika: nDakika, saniye: nSaniye };
+        }
 
         function sayaciGuncelle() {
-            const simdi = new Date().getTime();
+            const simdi = new Date();
 
-            // 1. HESAPLAMA: GEÇMİŞTEN BUGÜNE
-            const farkGecmis = simdi - tarihGecmis;
-            document.getElementById("toplamGun").innerText = Math.floor(farkGecmis / (1000 * 60 * 60 * 24)).toLocaleString('tr-TR');
-            document.getElementById("toplamSaat").innerText = Math.floor(farkGecmis / (1000 * 60 * 60)).toLocaleString('tr-TR');
-            document.getElementById("toplamDakika").innerText = Math.floor(farkGecmis / (1000 * 60)).toLocaleString('tr-TR');
-            document.getElementById("toplamSaniye").innerText = Math.floor(farkGecmis / 1000).toLocaleString('tr-TR');
+            // 1. TOPLAM GEÇEN SÜRE HESABI
+            const farkGecmisms = simdi.getTime() - tarihGecmis.getTime();
+            document.getElementById("toplamGun").innerText = Math.floor(farkGecmisms / (1000 * 60 * 60 * 24)).toLocaleString('tr-TR');
+            document.getElementById("toplamSaat").innerText = Math.floor(farkGecmisms / (1000 * 60 * 60)).toLocaleString('tr-TR');
+            document.getElementById("toplamDakika").innerText = Math.floor(farkGecmisms / (1000 * 60)).toLocaleString('tr-TR');
+            document.getElementById("toplamSaniye").innerText = Math.floor(farkGecmisms / 1000).toLocaleString('tr-TR');
 
-            // 2. HESAPLAMA: NİŞANA GERİ SAYIM
-            const farkNisan = tarihNisan - simdi;
-            if (farkNisan > 0) {
-                const gun = Math.floor(farkNisan / (1000 * 60 * 60 * 24));
-                const saat = Math.floor((farkNisan % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const dakika = Math.floor((farkNisan % (1000 * 60 * 60)) / (1000 * 60));
-                const saniye = Math.floor((farkNisan % (1000 * 60)) / 1000);
-
-                document.getElementById("kalanGun").innerText = gun;
-                document.getElementById("kalanSaat").innerText = saat;
-                document.getElementById("kalanDakika").innerText = dakika;
-                document.getElementById("kalanSaniye").innerText = saniye;
+            // 2. NİŞAN GERİ SAYIM
+            if (tarihNisan.getTime() > simdi.getTime()) {
+                const nisanKalan = tarihFarkiniHesapla(simdi, tarihNisan);
+                document.getElementById("kalanYil").innerText = nisanKalan.yil;
+                document.getElementById("kalanAy").innerText = nisanKalan.ay;
+                document.getElementById("kalanGun").innerText = nisanKalan.gun;
+                document.getElementById("kalanSaat").innerText = nisanKalan.saat;
+                document.getElementById("kalanDakika").innerText = nisanKalan.dakika;
+                document.getElementById("kalanSaniye").innerText = nisanKalan.saniye;
             } else {
                 document.querySelector(".baslik-kalan").innerText = "NİŞAN GÜNÜ GELDİ! 🎉";
-                document.getElementById("kalanGun").innerText = "0";
-                document.getElementById("kalanSaat").innerText = "0";
-                document.getElementById("kalanDakika").innerText = "0";
-                document.getElementById("kalanSaniye").innerText = "0";
+                ["kalanYil", "kalanAy", "kalanGun", "kalanSaat", "kalanDakika", "kalanSaniye"].forEach(id => {
+                    document.getElementById(id).innerText = "0";
+                });
             }
 
-            // 3. HESAPLAMA: NİKAHA GERİ SAYIM
-            const farkNikah = tarihNikah - simdi;
-            if (farkNikah > 0) {
-                const nGun = Math.floor(farkNikah / (1000 * 60 * 60 * 24));
-                const nSaat = Math.floor((farkNikah % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const nDakika = Math.floor((farkNikah % (1000 * 60 * 60)) / (1000 * 60));
-                const nSaniye = Math.floor((farkNikah % (1000 * 60)) / 1000);
-
-                document.getElementById("nikahGun").innerText = nGun;
-                document.getElementById("nikahSaat").innerText = nSaat;
-                document.getElementById("nikahDakika").innerText = nDakika;
-                document.getElementById("nikahSaniye").innerText = nSaniye;
+            // 3. NİKAH GERİ SAYIM
+            if (tarihNikah.getTime() > simdi.getTime()) {
+                const nikahKalan = tarihFarkiniHesapla(simdi, tarihNikah);
+                document.getElementById("nikahYil").innerText = nikahKalan.yil;
+                document.getElementById("nikahAy").innerText = nikahKalan.ay;
+                document.getElementById("nikahGun").innerText = nikahKalan.gun;
+                document.getElementById("nikahSaat").innerText = nikahKalan.saat;
+                document.getElementById("nikahDakika").innerText = nikahKalan.dakika;
+                document.getElementById("nikahSaniye").innerText = nikahKalan.saniye;
             } else {
                 document.querySelector(".baslik-nikah").innerText = "NİKAH GÜNÜ GELDİ! 💍🎉";
-                document.getElementById("nikahGun").innerText = "0";
-                document.getElementById("nikahSaat").innerText = "0";
-                document.getElementById("nikahDakika").innerText = "0";
-                document.getElementById("nikahSaniye").innerText = "0";
+                ["nikahYil", "nikahAy", "nikahGun", "nikahSaat", "nikahDakika", "nikahSaniye"].forEach(id => {
+                    document.getElementById(id).innerText = "0";
+                });
             }
         }
 
