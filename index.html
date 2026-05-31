@@ -144,32 +144,28 @@
         </div>
     </div>
 
-    <h1 class="baslik-nikah">NİKAHA KALAN SÜRE (23.08.2026 - 13:15)</h1>
+    <h1 class="baslik-nikah" id="nikahBaslik">NİKAHA KALAN SÜRE (23.08.2026 - 13:15)</h1>
 
-    <div class="container">
-        <div class="kutu border-nikah">
-            <span class="sayi" id="nikahYil">0</span>
-            <span class="etiket">YIL</span>
-        </div>
-        <div class="kutu border-nikah">
+    <div class="container" id="nikahKutulari">
+        <div class="kutu border-nikah" id="nikahAyKutusu">
             <span class="sayi" id="nikahAy">0</span>
-            <span class="etiket">AY</span>
+            <span class="etiket" id="nikahAyEtiket">AY</span>
         </div>
         <div class="kutu border-nikah">
             <span class="sayi" id="nikahGun">0</span>
-            <span class="etiket">GÜN</span>
+            <span class="etiket" id="nikahGunEtiket">GÜN</span>
         </div>
         <div class="kutu border-nikah">
             <span class="sayi" id="nikahSaat">0</span>
-            <span class="etiket">SAAT</span>
+            <span class="etiket" id="nikahSaatEtiket">SAAT</span>
         </div>
         <div class="kutu border-nikah">
             <span class="sayi" id="nikahDakika">0</span>
-            <span class="etiket">DAKİKA</span>
+            <span class="etiket" id="nikahDakikaEtiket">DAKİKA</span>
         </div>
         <div class="kutu border-nikah">
             <span class="sayi" id="nikahSaniye">0</span>
-            <span class="etiket">SANİYE</span>
+            <span class="etiket" id="nikahSaniyeEtiket">SANİYE</span>
         </div>
     </div>
 
@@ -179,7 +175,7 @@
         const tarihNisan = new Date(2026, 1, 13, 0, 0, 0);
         const tarihNikah = new Date(2026, 7, 23, 13, 15, 0);
 
-        // İki tarih arasındaki detaylı Yıl, Ay, Gün, Saat, Dakika, Saniye farkını bulan fonksiyon
+        // İki tarih arasındaki farkı detaylı bulan fonksiyon
         function tarihFarkiniHesapla(baslangic, bitis) {
             let nYil = bitis.getFullYear() - baslangic.getFullYear();
             let nAy = bitis.getMonth() - baslangic.getMonth();
@@ -204,7 +200,7 @@
         function sayaciGuncelle() {
             const simdi = new Date();
 
-            // 1. GEÇMİŞTEN BUGÜNE DETAYLI HESAP
+            // 1. GEÇMİŞTEN BUGÜNE HESAP
             const gecenSure = tarihFarkiniHesapla(tarihGecmis, simdi);
             document.getElementById("toplamYil").innerText = gecenSure.yil;
             document.getElementById("toplamAy").innerText = gecenSure.ay;
@@ -213,10 +209,9 @@
             document.getElementById("toplamDakika").innerText = gecenSure.dakika;
             document.getElementById("toplamSaniye").innerText = gecenSure.saniye;
 
-            // 2. NİŞAN GERİ SAYIM / GİZLEME MANTIĞI
+            // 2. NİŞAN GERİ SAYIM / GİZLEME
             if (tarihNisan.getTime() > simdi.getTime()) {
                 const nisanKalan = tarihFarkiniHesapla(simdi, tarihNisan);
-                document.getElementById("nisanBaslik").innerText = "NİŞANA KALAN SÜRE (13.02.2026)";
                 document.getElementById("kalanYil").innerText = nisanKalan.yil;
                 document.getElementById("kalanAy").innerText = nisanKalan.ay;
                 document.getElementById("kalanGun").innerText = nisanKalan.gun;
@@ -224,25 +219,51 @@
                 document.getElementById("kalanDakika").innerText = nisanKalan.dakika;
                 document.getElementById("kalanSaniye").innerText = nisanKalan.saniye;
             } else {
-                // Süre bittiyse yazıyı değiştir ve kutuları komple gizle
                 document.getElementById("nisanBaslik").innerText = "13.02.2026 NİŞANLANDIK! 💍🎉";
                 document.getElementById("nisanKutulari").style.display = "none";
             }
 
-            // 3. NİKAH GERİ SAYIM
+            // 3. NİKAH GERİ SAYIM VEYA EVLİLİK İLERİ SAYIM MANTIĞI
             if (tarihNikah.getTime() > simdi.getTime()) {
+                // Nikah henüz gelmedi, geri sayım yap
                 const nikahKalan = tarihFarkiniHesapla(simdi, tarihNikah);
-                document.getElementById("nikahYil").innerText = nikahKalan.yil;
+                
+                // Geri sayımda YIL kutusu gizli kalmalı
+                document.getElementById("nikahAyKutusu").style.display = "block"; 
+                document.getElementById("nikahAyEtiket").innerText = "AY";
+                
                 document.getElementById("nikahAy").innerText = nikahKalan.ay;
                 document.getElementById("nikahGun").innerText = nikahKalan.gun;
                 document.getElementById("nikahSaat").innerText = nikahKalan.saat;
                 document.getElementById("nikahDakika").innerText = nikahKalan.dakika;
                 document.getElementById("nikahSaniye").innerText = nikahKalan.saniye;
             } else {
-                document.querySelector(".baslik-nikah").innerText = "NİKAH GÜNÜ GELDİ! 👑🎉";
-                ["nikahYil", "nikahAy", "nikahGun", "nikahSaat", "nikahDakika", "nikahSaniye"].forEach(id => {
-                    document.getElementById(id).innerText = "0";
-                });
+                // NİKAH GÜNÜ GEÇTİ -> EVLENDİK MODU
+                document.getElementById("nikahBaslik").innerText = "23.08.2026 EVLENDİK! 👑🎉";
+                
+                // Evlilikten sonra ne kadar süre geçtiğini hesapla
+                const evlilikGecen = tarihFarkiniHesapla(tarihNikah, simdi);
+                
+                // Ay kutusunu YIL kutusuna dönüştürerek dinamik alan açıyoruz
+                document.getElementById("nikahAyKutusu").style.display = "block";
+                document.getElementById("nikahAy").innerText = evlilikGecen.yil;
+                document.getElementById("nikahAyEtiket").innerText = "YILDIR";
+                
+                // Diğer kutuları "...DIR / ...TİR" takılarına uyarla
+                document.getElementById("nikahGun").innerText = evlilikGecen.ay;
+                document.getElementById("nikahGunEtiket").innerText = "AYDIR";
+                
+                document.getElementById("nikahSaat").innerText = evlilikGecen.gun;
+                document.getElementById("nikahSaatEtiket").innerText = "GÜNDÜR";
+                
+                document.getElementById("nikahDakika").innerText = evlilikGecen.saat;
+                document.getElementById("nikahDakikaEtiket").innerText = "SAATTİR";
+                
+                document.getElementById("nikahSaniye").innerText = evlilikGecen.dakika;
+                document.getElementById("nikahSaniyeEtiket").innerText = "DAKİKADIR";
+                
+                // Not: Saniyeyi de görmek istersen ek bir kutu mantığı gerekir ama 5 kutu simetriyi bozmaz. 
+                // Bu dizilim: YILDIR | AYDIR | GÜNDÜR | SAATTİR | DAKİKADIR şeklinde akacaktır.
             }
         }
 
