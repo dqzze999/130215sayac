@@ -86,30 +86,38 @@
 </head>
 <body>
 
-    <h1 class="baslik-gecen">13.02.2015'TEN BERİ</h1>
+    <h1 class="baslik-gecen" id="gecenBaslik">13.02.2015'TEN BERİ</h1>
     
     <div class="container">
         <div class="kutu border-gecen">
+            <span class="sayi" id="toplamYil">0</span>
+            <span class="etiket">YIL</span>
+        </div>
+        <div class="kutu border-gecen">
+            <span class="sayi" id="toplamAy">0</span>
+            <span class="etiket">AY</span>
+        </div>
+        <div class="kutu border-gecen">
             <span class="sayi" id="toplamGun">0</span>
-            <span class="etiket">GÜNDÜR</span>
+            <span class="etiket">GÜN</span>
         </div>
         <div class="kutu border-gecen">
             <span class="sayi" id="toplamSaat">0</span>
-            <span class="etiket">SAATTİR</span>
+            <span class="etiket">SAAT</span>
         </div>
         <div class="kutu border-gecen">
             <span class="sayi" id="toplamDakika">0</span>
-            <span class="etiket">DAKİKADIR</span>
+            <span class="etiket">DAKİKA</span>
         </div>
         <div class="kutu border-gecen">
             <span class="sayi" id="toplamSaniye">0</span>
-            <span class="etiket">SANİYEDİR</span>
+            <span class="etiket">SANİYE</span>
         </div>
     </div>
 
-    <h1 class="baslik-kalan">NİŞANA KALAN SÜRE (13.02.2026)</h1>
+    <h1 class="baslik-kalan" id="nisanBaslik">NİŞANA KALAN SÜRE (13.02.2026)</h1>
 
-    <div class="container">
+    <div class="container" id="nisanKutulari">
         <div class="kutu border-kalan">
             <span class="sayi" id="kalanYil">0</span>
             <span class="etiket">YIL</span>
@@ -136,7 +144,7 @@
         </div>
     </div>
 
-    <h1 class="baslik-nikah">NİKAHA KALAN SÜRE (23.08.2026 - 13:15)</h1>
+    <h1 class="baslik-nikah">NİKAHA KALAN SÜRE (23.08.2026 - 13:15)</h1>
 
     <div class="container">
         <div class="kutu border-nikah">
@@ -184,7 +192,6 @@
             if (nDakika < 0) { nDakika += 60; nSaat--; }
             if (nSaat < 0) { nSaat += 24; nGun--; }
             if (nGun < 0) {
-                // Geçen ayın toplam gün sayısını bulup ekliyoruz
                 const gecenAy = new Date(bitis.getFullYear(), bitis.getMonth(), 0);
                 nGun += gecenAy.getDate();
                 nAy--;
@@ -197,16 +204,19 @@
         function sayaciGuncelle() {
             const simdi = new Date();
 
-            // 1. TOPLAM GEÇEN SÜRE HESABI
-            const farkGecmisms = simdi.getTime() - tarihGecmis.getTime();
-            document.getElementById("toplamGun").innerText = Math.floor(farkGecmisms / (1000 * 60 * 60 * 24)).toLocaleString('tr-TR');
-            document.getElementById("toplamSaat").innerText = Math.floor(farkGecmisms / (1000 * 60 * 60)).toLocaleString('tr-TR');
-            document.getElementById("toplamDakika").innerText = Math.floor(farkGecmisms / (1000 * 60)).toLocaleString('tr-TR');
-            document.getElementById("toplamSaniye").innerText = Math.floor(farkGecmisms / 1000).toLocaleString('tr-TR');
+            // 1. GEÇMİŞTEN BUGÜNE DETAYLI HESAP
+            const gecenSure = tarihFarkiniHesapla(tarihGecmis, simdi);
+            document.getElementById("toplamYil").innerText = gecenSure.yil;
+            document.getElementById("toplamAy").innerText = gecenSure.ay;
+            document.getElementById("toplamGun").innerText = gecenSure.gun;
+            document.getElementById("toplamSaat").innerText = gecenSure.saat;
+            document.getElementById("toplamDakika").innerText = gecenSure.dakika;
+            document.getElementById("toplamSaniye").innerText = gecenSure.saniye;
 
-            // 2. NİŞAN GERİ SAYIM
+            // 2. NİŞAN GERİ SAYIM / GİZLEME MANTIĞI
             if (tarihNisan.getTime() > simdi.getTime()) {
                 const nisanKalan = tarihFarkiniHesapla(simdi, tarihNisan);
+                document.getElementById("nisanBaslik").innerText = "NİŞANA KALAN SÜRE (13.02.2026)";
                 document.getElementById("kalanYil").innerText = nisanKalan.yil;
                 document.getElementById("kalanAy").innerText = nisanKalan.ay;
                 document.getElementById("kalanGun").innerText = nisanKalan.gun;
@@ -214,10 +224,9 @@
                 document.getElementById("kalanDakika").innerText = nisanKalan.dakika;
                 document.getElementById("kalanSaniye").innerText = nisanKalan.saniye;
             } else {
-                document.querySelector(".baslik-kalan").innerText = "NİŞAN GÜNÜ GELDİ! 🎉";
-                ["kalanYil", "kalanAy", "kalanGun", "kalanSaat", "kalanDakika", "kalanSaniye"].forEach(id => {
-                    document.getElementById(id).innerText = "0";
-                });
+                // Süre bittiyse yazıyı değiştir ve kutuları komple gizle
+                document.getElementById("nisanBaslik").innerText = "13.02.2026 NİŞANLANDIK! 💍🎉";
+                document.getElementById("nisanKutulari").style.display = "none";
             }
 
             // 3. NİKAH GERİ SAYIM
@@ -230,7 +239,7 @@
                 document.getElementById("nikahDakika").innerText = nikahKalan.dakika;
                 document.getElementById("nikahSaniye").innerText = nikahKalan.saniye;
             } else {
-                document.querySelector(".baslik-nikah").innerText = "NİKAH GÜNÜ GELDİ! 💍🎉";
+                document.querySelector(".baslik-nikah").innerText = "NİKAH GÜNÜ GELDİ! 👑🎉";
                 ["nikahYil", "nikahAy", "nikahGun", "nikahSaat", "nikahDakika", "nikahSaniye"].forEach(id => {
                     document.getElementById(id).innerText = "0";
                 });
